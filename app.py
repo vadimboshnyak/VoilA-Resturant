@@ -16,8 +16,14 @@ class Queue:
     def size(self):
         return len(self.queue)
     
+    def peek(self):
+        return self.queue[0]
+    
 def waitlistToDatabase(waitListQueue, seatsLeft):
-
+    if seatsLeft == 0:
+        print("The Resturant have reached the limit capacity, unable to add more people from the waitlist. {0} were not allowed off the waitlist".format(waitListQueue.size()))
+        return
+    
     while waitListQueue.size() > 0:
         if seatsLeft == 0:
             print("The Resturant have reached the limit capacity, unable to add more people from the waitlist. {0} were not allowed off the waitlist".format(waitListQueue.size()))
@@ -79,16 +85,18 @@ def addtoWaitlist(waitListQueue, dateToBeAdded):
     waitListQueue.enqueue({"firstName": firstName, "lastName": lastName, "phoneNum": phoneNum, "date": dateToBeAdded})
 
 
-def initData(waitListQueue, confirmedFile = "confirmed.json", waitlistFile = "waitlist.json"):
+def populateData(waitListQueue, confirmedFile, waitlistFile):
     fileName = confirmedFile
     currentDir = os.path.dirname(os.path.abspath(__file__))
-    filePath = os.path.join(currentDir, fileName)
+    dataDir = os.path.join(currentDir, "data")
+    filePath = os.path.join(dataDir, fileName)
+    print(filePath)
 
     if not os.path.exists(filePath):
         print(f"Error: {fileName} does not exist in the current directory.")
         return
     
-    with open(fileName, "r") as file:
+    with open(filePath, "r") as file:
         data = json.load(file)
     if visitorsTable.count_documents({"date": data[0]['date']}) > 0:
         return
@@ -99,10 +107,11 @@ def initData(waitListQueue, confirmedFile = "confirmed.json", waitlistFile = "wa
     
     # Now populating to waitlist queue
     fileName = waitlistFile
+    filePath = os.path.join(dataDir, fileName)
     if not os.path.exists(filePath):
         print(f"Error: {fileName} does not exist in the current directory.")
         return
-    with open(fileName, "r") as file:
+    with open(filePath, "r") as file:
         data = json.load(file)
     for entry in data:
         waitListQueue.enqueue(entry)
@@ -115,16 +124,16 @@ def main():
  #   dateToday = date.today()
  #   dateToday = dateToday.strftime("%Y-%m-%d")
     dateToday = "2025-01-03"
-    maxCapacity = 7000
+    maxCapacity = 5000
 
-    initData(waitListQueue)
+    populateData(waitListQueue, confirmedFile = "confirmed.json", waitlistFile = "waitlist.json")
     print("\nWELCOME TO VoilA_Restaurant, Today's date is: {0}, Our Max Capacity is: {1} people".format(dateToday, maxCapacity))
     print("================================================================\n\n")
 
     choice = "0"
     while choice != "3":
         currentCount = gamesTable.find_one({"date": dateToday})["attendance"]
-
+        seatsLeft = maxCapacity - currentCount
         print("There are currently {0} Confirmed Guests".format(currentCount))
         print("There are currently {0} in the Waitlist".format(waitListQueue.size()))
         print("There are currently {0} Seats Left at the Restaurant".format(maxCapacity - currentCount))
@@ -134,13 +143,15 @@ def main():
         print("3. Exit")
         choice = input("\nPlease Make a Selection: ")
 
-        if choice == "1":
-            addtoWaitlist(waitListQueue, dateToday)
-        elif choice == "2":
-            seatsLeft = maxCapacity - currentCount
-            waitlistToDatabase(waitListQueue, seatsLeft)
+        if (seatsLeft > 0):
+            if choice == "1":
+                addtoWaitlist(waitListQueue, dateToday)
+            elif choice == "2":
+                waitlistToDatabase(waitListQueue, seatsLeft)
         elif choice == "3":
             quit()
+        else:
+            print("We have reached capacity, we can not add new guests to the waitlist")
 
 
 if __name__ == "__main__":
