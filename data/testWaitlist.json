@@ -1,0 +1,50 @@
+[
+  {
+    "firstName": "Bruce",
+    "lastName": "Perez",
+    "phoneNum": "0311924245",
+    "date": "2025-01-03"
+  },
+  {
+    "firstName": "Holmes",
+    "lastName": "Nelson",
+    "phoneNum": "0229157473",
+    "date": "2025-01-03"
+  },
+  {
+    "firstName": "Lea",
+    "lastName": "Morales",
+    "phoneNum": "0762308094",
+    "date": "2025-01-03"
+  },
+  {
+    "firstName": "Billie",
+    "lastName": "Humphrey",
+    "phoneNum": "0736374904",
+    "date": "2025-01-03"
+  },
+  {
+    "firstName": "Frye",
+    "lastName": "Nash",
+    "phoneNum": "0727962474",
+    "date": "2025-01-03"
+  },
+  {
+    "firstName": "Rodriquez",
+    "lastName": "Delacruz",
+    "phoneNum": "0746147746",
+    "date": "2025-01-03"
+  },
+  {
+    "firstName": "Leslie",
+    "lastName": "Hayes",
+    "phoneNum": "0167212643",
+    "date": "2025-01-03"
+  },
+  {
+    "firstName": "Porter",
+    "lastName": "York",
+    "phoneNum": "0272865503",
+    "date": "2025-01-03"
+  }
+]
