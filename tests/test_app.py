@@ -1,6 +1,7 @@
 import pytest
-from database import visitorsTable, gamesTable
-from app import Queue, waitlistToDatabase, addtoWaitlist, populateData, displayAnalytics
+from utils.database import visitorsTable, gamesTable
+from utils.utils import Queue, waitlistToDatabase, addtoWaitlist, displayAnalytics
+from app import populateData
 
 # Queue Tests
 def test_Queue_enqueue():
