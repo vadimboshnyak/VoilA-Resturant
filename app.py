@@ -1,6 +1,6 @@
 import os
 import json
-from datetime import date
+from datetime import date, datetime
 from database import visitorsTable, gamesTable
 
 class Queue:
@@ -33,7 +33,8 @@ def waitlistToDatabase(waitListQueue, seatsLeft):
             return
         
         personToBeAdded = waitListQueue.remove()
-        gamesTable.insert_one(personToBeAdded)
+        visitorsTable.insert_one(personToBeAdded)
+
         currentGame = gamesTable.find_one({"date": personToBeAdded["date"]})
         updatedAttendence = currentGame["attendance"] + 1
         gamesTable.update_one(
@@ -73,10 +74,10 @@ def addtoWaitlist(waitListQueue, dateToBeAdded):
 
     # Check if it's in the waitlist queue
     existingInQueue = any(
-        item["firstName"] == firstName and
-        item["lastName"] == lastName and
-        item["phoneNum"] == phoneNum and
-        item["date"] == dateToBeAdded
+        item["firstName"].lower() == firstName.lower() and
+        item["lastName"].lower() == lastName.lower() and
+        item["phoneNum"].lower() == phoneNum.lower() and
+        item["date"].lower() == dateToBeAdded
         for item in waitListQueue.queue
     )
     if existingInDB or existingInQueue:
@@ -116,6 +117,24 @@ def populateData(waitListQueue, confirmedFile, waitlistFile):
     for entry in data:
         waitListQueue.enqueue(entry)
 
+def displayAnalytics():
+    dateToCheck = ""
+    while True:
+        dateToCheck = input("Please Enter the date in the following format (YYYY-MM-DD): ")
+        try:
+            datetime.strptime(dateToCheck, "%Y-%m-%d")
+            break
+        except:
+            print("Invalid Date Format, Please Enter in ('YYYY-MM-DD') Format")
+    game = gamesTable.find_one({"date" : dateToCheck})
+
+    if game is None:
+        print("Data for the date {0} is not available".format(dateToCheck))
+        return
+    print("Analytics for Date: ", (game["date"]))
+    print("Attendance: {0} People".format(game["attendance"]))
+    print("Overflow (People that did not get off the waitlist): {0} People".format(game["overflow"]))
+
 
 def main():
 
@@ -124,34 +143,38 @@ def main():
  #   dateToday = date.today()
  #   dateToday = dateToday.strftime("%Y-%m-%d")
     dateToday = "2025-01-03"
-    maxCapacity = 5000
+    maxCapacity = 7000
 
     populateData(waitListQueue, confirmedFile = "confirmed.json", waitlistFile = "waitlist.json")
     print("\nWELCOME TO VoilA_Restaurant, Today's date is: {0}, Our Max Capacity is: {1} people".format(dateToday, maxCapacity))
-    print("================================================================\n\n")
+    print("================================================================")
 
     choice = "0"
-    while choice != "3":
+    dateToCheck = ""
+    while choice != "4":
         currentCount = gamesTable.find_one({"date": dateToday})["attendance"]
         seatsLeft = maxCapacity - currentCount
-        print("There are currently {0} Confirmed Guests".format(currentCount))
+        print("\nThere are currently {0} Confirmed Guests".format(currentCount))
         print("There are currently {0} in the Waitlist".format(waitListQueue.size()))
         print("There are currently {0} Seats Left at the Restaurant".format(maxCapacity - currentCount))
         print("\n\nPlease choose an Option from below:")
         print("1. Add a New Visitor to the Waitlist")
         print("2. Add Waitlisted People to Confirmed Guests")
-        print("3. Exit")
+        print("3. Display Analytics")
+        print("4. Exit")
         choice = input("\nPlease Make a Selection: ")
 
-        if (seatsLeft > 0):
-            if choice == "1":
-                addtoWaitlist(waitListQueue, dateToday)
-            elif choice == "2":
-                waitlistToDatabase(waitListQueue, seatsLeft)
-        elif choice == "3":
-            quit()
-        else:
+        if choice == "1" and seatsLeft > 0:
+            addtoWaitlist(waitListQueue, dateToday)
+        elif choice == "2" and seatsLeft > 0:
+            waitlistToDatabase(waitListQueue, seatsLeft)
+        elif choice == "2" or choice == "1" and seatsLeft <= 0:
             print("We have reached capacity, we can not add new guests to the waitlist")
+        elif choice == "3":
+            displayAnalytics()
+        elif choice == "4":
+            quit()
+        
 
 
 if __name__ == "__main__":
