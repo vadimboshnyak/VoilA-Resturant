@@ -46,7 +46,7 @@ def main():
     maxCapacity = 7000
 
     populateData(waitListQueue, confirmedFile = "confirmed.json", waitlistFile = "waitlist.json")
-    print("\nWELCOME TO VoilA_Restaurant, Today's date is: {0}, Our Max Capacity is: {1} people".format(dateToday, maxCapacity))
+    print("\nWELCOME TO VoilA_Restaurant, The date is: {0}, Our Max Capacity is: {1} people".format(dateToday, maxCapacity))
     print("================================================================")
 
     choice = "0"
