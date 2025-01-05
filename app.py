@@ -1,25 +1,7 @@
-import pymongo
 import os
 import json
 from datetime import date
-
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["VoilA_Restaurant"]
-
-visitorsTable = db["Visitors"]
-visitorsTable.create_index(
-    [
-        ("firstName", 1),
-        ("lastName", 1),
-        ("phone", 1),
-        ("date", 1)
-    ],
-    unique=True
-)
-
-gamesTable = db["GameStats"]
-visitorsTable.drop()
-gamesTable.drop()
+from database import visitorsTable, gamesTable
 
 class Queue:
     def __init__(self):
@@ -75,6 +57,7 @@ def addtoWaitlist(waitListQueue, dateToBeAdded):
             continue
         break
     
+    # Check if existing entry is visitors database
     existingInDB = visitorsTable.find_one({
         "firstName": firstName,
         "lastName": lastName,
@@ -82,7 +65,7 @@ def addtoWaitlist(waitListQueue, dateToBeAdded):
         "date": dateToBeAdded
     })
 
-    # Check if it's in the queue
+    # Check if it's in the waitlist queue
     existingInQueue = any(
         item["firstName"] == firstName and
         item["lastName"] == lastName and
@@ -132,7 +115,7 @@ def main():
  #   dateToday = date.today()
  #   dateToday = dateToday.strftime("%Y-%m-%d")
     dateToday = "2025-01-03"
-    maxCapacity = 5000
+    maxCapacity = 7000
 
     initData(waitListQueue)
     print("\nWELCOME TO VoilA_Restaurant, Today's date is: {0}, Our Max Capacity is: {1} people".format(dateToday, maxCapacity))
