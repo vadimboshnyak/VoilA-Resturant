@@ -28,7 +28,7 @@
 ### Prerequisites
 
 1. Python 3.x installed on your system.
-2. MongoDB running locally or on a server. Currently configured like this: mongodb://localhost:27017/. Can edit in utils->database.py on line 3
+2. MongoDB running locally or on a server. Currently configured like this: mongodb://localhost:27017/. Can edit in utils->database.py on line 12
 3. Install Python dependencies using the `requirements.txt` file:
    ```bash
    pip install -r requirements.txt
@@ -77,3 +77,11 @@
 
    
 ![Diagram](https://github.com/user-attachments/assets/30dc13ba-ada8-4091-8ffc-591e964d896b)
+
+
+### Final Words
+I have added comments to each function to show what I was thinking and the logic behind it. You can play around with the app to see all the outputs, you can change the maxCapacity variable on line 57 to a different number. Can also put wrong inputs to see some input validation that I made.
+
+This version was just made to have 1 running application, but I included a rough high level sketch up of a more scalable app.
+
+I chose MongoDB for the scalability and the fact that we do not really need any relationships between our tables. I chose python just because I am most comfortable with it and for the sake of the interview, but for an actual app like this a stack like Node.JS, TypeScript, Express.JS, React (or any other front end frameworks) would be my first choice for an app of this sort. Thanks!
