@@ -1,6 +1,7 @@
 from utils.database import visitorsTable, gamesTable
 from datetime import datetime
 
+# Basic Queue implementation from a python array instead of using collections.
 class Queue:
     def __init__(self):
         self.queue = []
@@ -16,15 +17,19 @@ class Queue:
     
     def peek(self):
         return self.queue[0]
-    
+
+"""
+Inputs: waitlistQueue (our queue that holds the waitlist), seatsLeft (int with how many seats left in the restaurant) returns nothing
+Implementation: loop until waitlistQueue is empty, if seatsLeft is 0, I output that capacity has reached and update the gamesTable with the overflow 
+(the size of the waitlist queue) because that is how many people did not get off the waitlist. I pop from queue, add that person to the confirmed database and increment
+the gamesTable current game attendance buy 1, and decrement seatsLeft by 1. The whole point of this is to remove the people coming off the waitlist and add them to 
+the visitors table.
+"""    
 def waitlistToDatabase(waitListQueue, seatsLeft):
-    if seatsLeft == 0:
-        print("The Resturant have reached the limit capacity, unable to add more people from the waitlist. {0} were not allowed off the waitlist".format(waitListQueue.size()))
-        return
     
     while waitListQueue.size() > 0:
         if seatsLeft == 0:
-            print("The Resturant have reached the limit capacity, unable to add more people from the waitlist. {0} were not allowed off the waitlist".format(waitListQueue.size()))
+            print("The Restaurant have reached the limit capacity, unable to add more people from the waitlist. {0} were not allowed off the waitlist".format(waitListQueue.size()))
             gamesTable.update_one(
             {"_id": currentGame["_id"]},
             {"$set": {"overflow": waitListQueue.size()}})
@@ -34,14 +39,20 @@ def waitlistToDatabase(waitListQueue, seatsLeft):
         visitorsTable.insert_one(personToBeAdded)
 
         currentGame = gamesTable.find_one({"date": personToBeAdded["date"]})
-        updatedAttendence = currentGame["attendance"] + 1
+        updatedAttendance = currentGame["attendance"] + 1
         gamesTable.update_one(
             {"_id": currentGame["_id"]},
-            {"$set": {"attendance": updatedAttendence}})
+            {"$set": {"attendance": updatedAttendance}})
         seatsLeft -= 1
     
 
-
+"""
+Inputs: waitlistQueue (our queue that holds the waitlist), dateToBeAdded (string date) returns nothing
+Implementation: get input from the user (first last, last name and phone number), validate it, check if entry is either in the database or in the waitlist queue,
+if yes deny the entry as we do not want duplicate entries. If not, then add to the waitlist queue. This is the registration part of the user to the waitlist. Currently
+it only allows the current date or the date passed in, but in the working app the person should select the date to enter the waitlist, for example a datepicker from React
+would be a great component to use here.
+"""    
 def addtoWaitlist(waitListQueue, dateToBeAdded):
     while True:
         firstName = input("Enter your First Name: ")
@@ -61,8 +72,7 @@ def addtoWaitlist(waitListQueue, dateToBeAdded):
             print("Invalid Phone Number, make sure you only enter digits, and maximum 10 digits")
             continue
         break
-    
-    # Check if existing entry is visitors database
+
     existingInDB = visitorsTable.find_one({
         "firstName": firstName,
         "lastName": lastName,
@@ -70,7 +80,6 @@ def addtoWaitlist(waitListQueue, dateToBeAdded):
         "date": dateToBeAdded
     })
 
-    # Check if it's in the waitlist queue
     existingInQueue = any(
         item["firstName"].lower() == firstName.lower() and
         item["lastName"].lower() == lastName.lower() and
@@ -83,6 +92,12 @@ def addtoWaitlist(waitListQueue, dateToBeAdded):
         return
     waitListQueue.enqueue({"firstName": firstName, "lastName": lastName, "phoneNum": phoneNum, "date": dateToBeAdded})
 
+
+"""
+Inputs: None returns None
+Implementation: To display analytics of a certain date. Asks for date input and validates it, then searches the gamesTable to find if there was an event on this date
+outputs the date, attendance for that day and the overflow. I did this so the owner can see each day and how well the night went to think about the marketing strategy
+"""    
 def displayAnalytics():
     dateToCheck = ""
     while True:

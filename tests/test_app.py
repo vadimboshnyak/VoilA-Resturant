@@ -3,7 +3,7 @@ from utils.database import visitorsTable, gamesTable
 from utils.utils import Queue, waitlistToDatabase, addtoWaitlist, displayAnalytics
 from app import populateData
 
-# Queue Tests
+# Queue Test Enqueue
 def test_Queue_enqueue():
     waitListQueue = Queue()
 
@@ -21,6 +21,7 @@ def test_Queue_enqueue():
     "date": "2025-01-03"})
     assert waitListQueue.size() == 2
 
+# Queue Test Remove
 def test_Queue_remove():
     waitListQueue = Queue()
 
@@ -53,16 +54,21 @@ def test_Queue_remove():
     "phoneNum": "9999999999",
     "date": "2025-01-03"}
 
+#To empty the database tables every test.
 @pytest.fixture(autouse=True)
 def databasesEmpty():
     visitorsTable.drop()
     gamesTable.drop()
 
-
+"""
+waitlist to database addition when we have the exact number of seats
+attendance = 6998, seatsLeft = 2 
+therefore we will get attendance=7000, seatsLeft=0, overflow=0, and waitlistQueue=0
+"""
 def test_waitlistToDatabaseExactSeats():
     gamesTable.insert_one({
         "date": "2025-01-03",
-        "attendance": 0,
+        "attendance": 6998,
         "overflow": 0
     })
     waitListQueue = Queue()
@@ -84,9 +90,14 @@ def test_waitlistToDatabaseExactSeats():
     
     game = gamesTable.find_one({"date": "2025-01-03"})
 
-    assert game["attendance"] == 2
+    assert game["attendance"] == 7000
     assert game["overflow"] == 0
 
+"""
+waitlist to database addition when we don't have enough seats
+attendance = 6999, seatsLeft = 1
+therefore we will get attendance=7000, seatsLeft=0, overflow=1, and waitlistQueue=1
+"""
 def test_waitlistToDatabaseOverFlow(capfd):
     gamesTable.insert_one({
         "date": "2025-01-03",
@@ -109,15 +120,19 @@ def test_waitlistToDatabaseOverFlow(capfd):
     waitlistToDatabase(waitListQueue, seatsLeft=1)
 
     out, error = capfd.readouterr()
-
-    assert "The Resturant have reached the limit capacity, unable to add more people from the waitlist. 1 were not allowed off the waitlist" in out
+ 
+    assert "The Restaurant have reached the limit capacity, unable to add more people from the waitlist. 1 were not allowed off the waitlist" in out
     assert waitListQueue.size() == 1
     
     game = gamesTable.find_one({"date": "2025-01-03"})
 
     assert game["attendance"] == 7000
     assert game["overflow"] == 1
-
+"""
+waitlist to database addition when we have more than enough seats
+attendance = 6990, seatsLeft = 10 
+therefore we will get attendance=6992, seatsLeft=8, overflow=0, and waitlistQueue=0
+"""
 def test_waitlistToDatabaseEnoughSeats():
     gamesTable.insert_one({
         "date": "2025-01-03",
@@ -137,7 +152,7 @@ def test_waitlistToDatabaseEnoughSeats():
     "phoneNum": "9999999999",
     "date": "2025-01-03"})
 
-    waitlistToDatabase(waitListQueue, seatsLeft=8)
+    waitlistToDatabase(waitListQueue, seatsLeft=10)
 
     assert waitListQueue.size() == 0
     
@@ -146,6 +161,7 @@ def test_waitlistToDatabaseEnoughSeats():
     assert game["attendance"] == 6992
     assert game["overflow"] == 0
 
+# Test to add guest to waitlist, tests input and addition to the queue.
 def test_addtoWaitlist(monkeypatch):
     inputs = iter(["Vadim", "Boshnyak", "7056472222"])
 
@@ -158,6 +174,7 @@ def test_addtoWaitlist(monkeypatch):
     assert waitListQueue.peek()["lastName"] == "Boshnyak"
     assert waitListQueue.peek()["phoneNum"] == "7056472222"
 
+# Test to check for invalid input
 def test_addtoWaitlistInvalidInput(monkeypatch, capfd):
     inputs = iter(["1231231231","Vadim", "Boshnyak", "7056472222"])
 
@@ -168,6 +185,7 @@ def test_addtoWaitlistInvalidInput(monkeypatch, capfd):
     out, error = capfd.readouterr()
     assert "Invalid Input" in out
 
+# Test to check for adding a duplicate
 def test_addtoWaitlistDuplicate(monkeypatch, capfd):
     inputs = iter(["Test", "TestLast", "9999999999"])
 
@@ -200,7 +218,7 @@ def test_addtoWaitlistDuplicate(monkeypatch, capfd):
     out, error = capfd.readouterr()
     assert "This person has already registered. Can not add this person." in out
 
-
+# Test to populate data to the database and the queue using 2 small test JSONs
 def test_populateData():
     # testWaitlist.json has 8 entries, testConfirmed.json has 5 entries.
     
@@ -219,6 +237,7 @@ def test_populateData():
     assert visitor
     assert visitor["phoneNum"] == "0938546205"
 
+# Testing when we have an invalid file name
 def test_populateDataInvalidFileName(capfd):
     # Testing for non existing files
     
@@ -233,7 +252,7 @@ def test_populateDataInvalidFileName(capfd):
 
     assert visitorsTable.count_documents({}) == 0
 
-
+# Testing displaying analytics
 def test_displayAnalytics(capfd, monkeypatch):
     dateInput = "2025-01-03"
     monkeypatch.setattr('builtins.input', lambda _: dateInput)
@@ -244,6 +263,7 @@ def test_displayAnalytics(capfd, monkeypatch):
     out, error = capfd.readouterr()
     assert "Analytics for Date:  {0}".format(dateInput) in out
 
+# Testing when we have no data for the given date
 def test_displayAnalyticsInvalidDate(capfd, monkeypatch):
     dateInput = "2025-01-05"
     monkeypatch.setattr('builtins.input', lambda _: dateInput)
@@ -255,6 +275,7 @@ def test_displayAnalyticsInvalidDate(capfd, monkeypatch):
     out, error = capfd.readouterr()
     assert "Data for the date {0} is not available".format(dateInput) in out
 
+# Testing invalid date format for analytics
 def test_displayAnalyticsInvalidInput(capfd, monkeypatch):
     dateInput = iter(["05-01-2025", "2025-03-01"])
     monkeypatch.setattr('builtins.input', lambda _: next(dateInput))

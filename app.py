@@ -4,13 +4,17 @@ from datetime import date, datetime
 from utils.database import visitorsTable, gamesTable
 from utils.utils import Queue, addtoWaitlist, waitlistToDatabase, displayAnalytics
 
-
+"""
+Function to populate data from given JSONs files with a list of people. The files are in the following format [{"firstName": "Hobbs","lastName": "Crawford",
+"phoneNum": "0844851659","date": "2025-01-03"}]. My logic here was that we will have an easy way to register a big file of people as it was described in the problem
+with initial 2000 confirmed guests and 4000 waitlisted guests. It opens up the file using os, inserts data into the visitors table, then inserts an entity of a game 
+to gamesTable. Then for each entry from the waitlisted json it adds to the waitlist queue.
+"""
 def populateData(waitListQueue, confirmedFile, waitlistFile):
     fileName = confirmedFile
     currentDir = os.path.dirname(os.path.abspath(__file__))
     dataDir = os.path.join(currentDir, "data")
     filePath = os.path.join(dataDir, fileName)
-    print(filePath)
 
     if not os.path.exists(filePath):
         print(f"Error: {fileName} does not exist in the current directory.")
@@ -36,6 +40,13 @@ def populateData(waitListQueue, confirmedFile, waitlistFile):
     for entry in data:
         waitListQueue.enqueue(entry)
 
+"""
+Main function to run the app. Calls populateData to fill up the database tables from the JSON files in data folder. I have done because as the problem was explained as
+the owner had two files, 1 waitlist file and 1 confirmed guests file. The date currently is hard coded for this example to show how the app and logic works.
+I have made a simple menu that runs until the user inputs 4, every iteration, the statistics for the current date will be shown just so we see how many people in waitlist
+how many people confirmed and how many seats left. If user selects 1, waitlist registration happens with input (addToWaitlist), if 2 then waitlisted people are added to 
+the confirmed guests (waitlistToDatabase), if 3, display analytics will show (displayAnalytics)
+"""
 def main():
 
     waitListQueue = Queue()
