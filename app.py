@@ -77,6 +77,8 @@ def main():
 
         if choice == "1" and seatsLeft > 0:
             addtoWaitlist(waitListQueue, dateToday)
+        elif choice == "2" and waitListQueue.size() == 0:
+            print("The waitlist is empty, add more visitors to the waitlist")
         elif choice == "2" and seatsLeft > 0:
             waitlistToDatabase(waitListQueue, seatsLeft)
         elif choice == "2" or choice == "1" and seatsLeft <= 0:
