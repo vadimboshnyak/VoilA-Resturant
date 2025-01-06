@@ -55,3 +55,25 @@
    ```bash
    python -m pytest
    ```
+
+### Pictures
+1. Initial Start
+
+![intial](https://github.com/user-attachments/assets/2be1990f-88a2-4e5d-8537-355d6f065fc5)
+
+2. Adding a new visitor to the waitlist
+
+![adding a new visitor to the waitlist](https://github.com/user-attachments/assets/499370ae-1c1e-4843-8a6b-655b52ea382a)
+
+3. Adding watilisted people to confirmed guests
+
+![adding watilisted people to confirmed guests](https://github.com/user-attachments/assets/b475248f-1903-42fd-b275-a506fb9d1aa6)
+
+4. Display analytics
+
+![Display analytics](https://github.com/user-attachments/assets/c5396d94-f793-48fc-b36a-ea4b8a9db1b7)
+
+5. A rough high level system design flow chart
+
+   
+![Diagram](https://github.com/user-attachments/assets/30dc13ba-ada8-4091-8ffc-591e964d896b)
